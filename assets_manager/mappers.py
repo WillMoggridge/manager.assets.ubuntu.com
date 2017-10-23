@@ -1,14 +1,13 @@
+from future import standard_library
+standard_library.install_aliases() # noqa
+
 # System
+from builtins import object
 import mimetypes
 from base64 import b64encode
-try:
-    from urllib.parse import (
-        parse_qsl, urlencode, urljoin, urlparse, urlunparse
-    )
-except ImportError:
-    from urlparse import (
-        parse_qsl, urlencode, urljoin, urlparse, urlunparse
-    )
+from urllib.parse import (
+    parse_qsl, urlencode, urljoin, urlparse, urlunparse
+)
 
 # Modules
 import requests
@@ -24,11 +23,11 @@ def add_query_params(url, params):
     query.update(params)
 
     url_parts[4] = urlencode(query)
-
+    url_parts = [str(part) or None for part in url_parts]
     return urlunparse(url_parts)
 
 
-class AssetMapper:
+class AssetMapper(object):
     """
     Map data from the Assets API into model objects
     """
@@ -58,7 +57,7 @@ class AssetMapper:
         if query_parameters:
             query_strings = []
 
-            for param_name, param_value in query_parameters.items():
+            for param_name, param_value in list(query_parameters.items()):
                 query_strings.append('{}={}'.format(param_name, param_value))
 
             url += '?{}'.format('&'.join(query_strings))
@@ -136,7 +135,7 @@ class AssetMapper:
         return {
             "file_path": datum["file_path"],
             "tags": datum["tags"],
-            "url": urljoin(self.server_url, datum["file_path"]),
+            "url": urljoin(self.server_url, str(datum["file_path"])),
             "image": mimetype in self.image_types,
             "created": datum["created"]
         }
